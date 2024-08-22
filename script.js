@@ -24,12 +24,26 @@ Employee.prototype.jobGreet = function() {
     console.log(`Hello, my name is ${this.name}, I am ${this.age} years old, and my job title is ${this.jobTitle}.`);
 };
 
-const person = new Person("Alice", 25);
-const employee = new Employee("Bob", 30, "Manager");
+() => {
+    cy.visit(baseUrl + "/main.html");
+    cy.window().then(win => {
+        const Person = win.Person;
+        const Employee = win.Employee;
 
-// Step 4: Use the methods to verify the objects
-person.greet();       // Output: Hello, my name is Alice, I am 25 years old.
-employee.jobGreet();
+        const person = new Person("Alice", 25);
+        const employee = new Employee("Bob", 30, "Manager");
+
+        cy.stub(win.console, "log").as("consoleLog");
+
+        person.greet();
+        cy.get("@consoleLog").should("be.calledWith", `Hello, my name is Alice, I am 25 years old.`);
+
+        employee.jobGreet();
+        cy.get("@consoleLog").should("be.calledWith", `Hello, my name is Bob, I am 30 years old, and my job title is Manager.`);
+    });
+}
+
+
 // Do not change code below this line
 window.Person = Person;
 window.Employee = Employee;
